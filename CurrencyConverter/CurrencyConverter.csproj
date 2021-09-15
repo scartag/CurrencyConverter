@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.10" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.9" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CurrencyConverter.Data\CurrencyConverter.Data.csproj" />
+    <ProjectReference Include="..\CurrencyConverter.Lib\CurrencyConverter.Lib.csproj" />
+    <ProjectReference Include="..\CurrencyConverter.Services\CurrencyConverter.Services.csproj" />
+  </ItemGroup>
+
+</Project>

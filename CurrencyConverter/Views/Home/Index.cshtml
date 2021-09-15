@@ -1,0 +1,128 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+
+
+<div class="jumbotron mt-5" style="border: 1px solid #ccc; background: #f0f0f0;" id="converter">
+    <form>
+        <div class="row">
+            <div class="col-2">
+                <input type="text" class="form-control" placeholder="Currency From" v-model="request.from">
+            </div>
+            <div class="col-2">
+                <input type="text" class="form-control" placeholder="Currency To" v-model="request.to">
+            </div>
+            <div class="col-2">
+                <input type="number" class="form-control" placeholder="Amount" v-model.number="request.amount">
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn btn-primary mb-2" :disabled="!valid" @@click.prevent="convert">Convert</button>
+            </div>
+            <div class="col-2">
+                <div class="spinner-border" role="status" v-if="loading">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </form>
+    <hr class="my-4">
+    <template v-if="result">
+        <h6>{{result.amount}} {{result.from}} =</h6>
+        <h3>{{result.converted}} {{result.to}}</h3>
+
+        <div>1 {{result.from}} = {{result.rate}} {{result.to}}</div>
+        <div><strong>Date: </strong> {{result.date}}</div>
+    </template>
+
+
+    <div class="alert alert-danger mt-2" role="alert" v-if="error">
+        <strong>{{error}}</strong>
+    </div>
+
+</div>
+
+
+
+@section Scripts {
+
+
+    <script type="text/javascript">
+
+        $.postJSON = function (url, data, callback) {
+            return jQuery.ajax({
+                'type': 'POST',
+                'url': url,
+                'contentType': 'application/json; charset=utf-8',
+                'data': JSON.stringify(data),
+                'dataType': 'json',
+                'success': callback
+            });
+        };
+
+        let app = null;
+        app = new Vue({
+            el: "#converter",
+            data: {
+                loading: false,
+                request: {
+                    from: null,
+                    to: null,
+                    amount: null
+                },
+                error: null,
+                result: null,
+            },
+            computed: {
+                valid() {
+                    return (
+                        this.request.from !== null && this.request.from.trim().length > 0 &&
+                        this.request.to !== null && this.request.to.trim().length > 0
+                    );
+                }
+            },
+            methods: {
+
+                convert() {
+                    const requestItem = { currencyFrom: this.request.from, currencyTo: this.request.to, amount: this.request.amount };
+                    const self = this;
+                    this.loading = true;
+                    this.result = null;
+                    this.error = null;
+                    axios.post('/api/v1/rates', requestItem)
+                        .then(function (response) {
+                            const res = {
+                                from: self.request.from,
+                                to: self.request.to,
+                                amount: self.request.amount,
+                                converted: response.data.conversionAmount > 0 ? response.data.conversionAmount.toFixed(2) : response.data.conversionAmount.toFixed(4),
+                                rate: response.data.rate,
+                                date: new Date(response.data.rateDate).toLocaleDateString()
+                            };
+                            self.result = res;
+                            console.log(data);
+                        })
+                        .catch(function (error) {
+                            console.log(JSON.stringify(error));
+                            if (error.response.status === 404) {
+                                self.error = "The specified exchange rate was not found";
+                            } else if (error.response.status == 400) {
+                                self.error = error.response.data.title;
+                            } else {
+                                self.error = "An error occured with the request.";
+                            }
+                        }).finally(function() {
+                            self.loading = false;
+                        });
+                }
+
+            }
+        });
+
+
+
+    </script>
+
+
+} 
